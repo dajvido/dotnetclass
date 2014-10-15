@@ -63,10 +63,11 @@
     <Compile Include="BinaryFormatterPayloadSerializer.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="IPayloadSerializer.cs" />
-    <Compile Include="JSONPayloadSerializer.cs" />
+    <Compile Include="JsonPayloadSerializer.cs" />
     <Compile Include="PayloadDto.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProtocolBuffersPayloadSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

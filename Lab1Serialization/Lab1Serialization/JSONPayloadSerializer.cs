@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Lab1Serialization
 {
-    class JSONPayloadSerializer : IPayloadSerializer
+    class JsonPayloadSerializer : IPayloadSerializer
     {
         public byte[] Serialize(PayloadDto dto)
         {
