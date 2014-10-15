@@ -58,7 +58,9 @@ namespace Lab1Serialization
 
         public void Run()
         {
-            _serializer = new BinaryFormatterPayloadSerializer();
+            //_serializer = new BinaryFormatterPayloadSerializer();
+            _serializer = new JSONPayloadSerializer();
+
 
             Thread consumerThread = new Thread(ConsumerLoop);
             Thread producerThread = new Thread(ProducerLoop);
