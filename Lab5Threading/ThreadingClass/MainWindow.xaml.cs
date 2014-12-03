@@ -89,22 +89,6 @@ namespace ThreadingClass
 
             foreach (var func in functions)
             {
-            //    ThreadStart function = () =>
-            //    {
-            //        int foundString = func();
-
-            //        Interlocked.Add(ref _result, foundString);
-
-            //        if (Interlocked.Decrement(ref scheduled) == 0)
-            //        {
-            //            WriteResult(Res2, sender);
-            //        }
-            //    };
-
-            //    Thread th = new Thread(function);
-            //    th.Start();
-            //}
-            
                 new Thread(() =>
                     {
                         Interlocked.Add(ref _result, func());
@@ -123,18 +107,6 @@ namespace ThreadingClass
 
             foreach (var func in functions)
             {
-                //WaitCallback function = _ =>
-                //{
-                //    int foundString = func();
-
-                //    Interlocked.Add(ref _result, foundString);
-
-                //    if (Interlocked.Decrement(ref scheduled) == 0)
-                //    {
-                //        WriteResult(Res3, sender);
-                //    }
-                //};
-                //ThreadPool.QueueUserWorkItem(function, null);
                 ThreadPool.QueueUserWorkItem(_ =>
                 {
                     Interlocked.Add(ref _result, func());
@@ -148,17 +120,7 @@ namespace ThreadingClass
         {
             ResetTimeAndResult(sender);
             var functions = DataHelper.FindStringCountActions(_data, _searchTerm, _processingTime, ConcurrencyLevel);
-            //int scheduled = functions.Count;
 
-            //List<Task<int>> tasks = new List<Task<int>>();
-            //foreach (Func<int> function in functions)
-            //{
-            //    Task<int> task = Task.Factory.StartNew<int>(function);
-            //    tasks.Add(task);
-            //}
-            //Task.WhenAll(tasks)
-            //    .ContinueWith(partialTasks => _result = partialTasks.Result.Sum())
-            //    .ContinueWith(result => WriteResult(Res4, sender));
             List<Task<int>> tasks = new List<Task<int>>();
             foreach (var function in functions)
             {
@@ -169,8 +131,6 @@ namespace ThreadingClass
 
         private void btnClassicApm_Click(object sender, RoutedEventArgs e)
         {
-            //foreach { function.BeginInvoke(
-            //oraz .EndInvoke
             ResetTimeAndResult(sender);
             var functions = DataHelper.FindStringCountActions(_data, _searchTerm, _processingTime, ConcurrencyLevel);
             int scheduled = functions.Count;

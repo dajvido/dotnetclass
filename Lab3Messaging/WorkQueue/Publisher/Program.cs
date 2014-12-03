@@ -16,12 +16,19 @@ namespace Publisher
             {
                 using (var channel = conn.CreateModel())
                 {
+                    channel.ExchangeDeclare(Const.ExchangeName, ExchangeType.Direct);
                     var replyQueue = SetUpReplyChannel(channel);
                     
                     for (int i = 0; i < Const.MessageCount; i++)
                     {
                         string message = "Complex task #" + i;
                         
+                        var msgProperties = channel.CreateBasicProperties();
+                        msgProperties.ReplyTo = replyQueue.QueueName;
+                        msgProperties.CorrelationId = i.ToString();
+                        
+                        channel.BasicPublish(Const.ExchangeName, Const.RoutingKey, 
+                            msgProperties, message.GetBytes());    
                         Console.WriteLine("Publishing #" + i);
                         Thread.Sleep(TimeSpan.FromMilliseconds(100));
                     }
@@ -33,7 +40,11 @@ namespace Publisher
 
         private static QueueDeclareOk SetUpReplyChannel(IModel channel)
         {
-            return null;
+            var replyQueue = channel.QueueDeclare();
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += (_, args) => OnReply(args);
+            channel.BasicConsume(replyQueue.QueueName, false, consumer);
+            return replyQueue;
         }
 
         private static void OnReply(BasicDeliverEventArgs args)

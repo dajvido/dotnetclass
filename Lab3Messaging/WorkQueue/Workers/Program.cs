@@ -26,7 +26,10 @@ namespace Workers
             IModel channel;
             using (Connect(out channel))
             {
-                Console.WriteLine("####### I got message: {0}", null);
+                var consumer = new QueueingBasicConsumer(channel);
+                channel.BasicConsume(Const.QueueName, false, consumer);
+                BasicDeliverEventArgs msg = consumer.Queue.Dequeue();
+                Console.WriteLine("####### I got message: {0}", msg.Body.GetString());
                 Thread.Sleep(TimeSpan.FromMilliseconds(500));
             }
             Console.WriteLine("######## I just died :(");
@@ -37,9 +40,12 @@ namespace Workers
             IModel channel;
             using (Connect(out channel))
             {
+                var consumer = new QueueingBasicConsumer(channel);
+                channel.BasicConsume(Const.QueueName, false, consumer);
                 for (int i = 0; i < Const.MessageCount; i++)
                 {
-                    Task.Factory.StartNew(() => GoodWorker_Process(null, channel));
+                    BasicDeliverEventArgs arg = consumer.Queue.Dequeue();
+                    Task.Factory.StartNew(() => GoodWorker_Process(arg, channel));
                 }
                 AllMessagesReceived.Wait();
             }
@@ -61,6 +67,9 @@ namespace Workers
 
         private static void SendReply(BasicDeliverEventArgs msg, IModel channel)
         {
+            var props = channel.CreateBasicProperties();
+            props.CorrelationId = msg.BasicProperties.CorrelationId;
+            channel.BasicPublish(string.Empty, msg.BasicProperties.ReplyTo, props, "Hello".GetBytes());
         }
 
         private static CompositeDisposable Connect(out IModel channel)
@@ -70,7 +79,13 @@ namespace Workers
             IConnection conn = factory.CreateConnection();
 
             channel = conn.CreateModel();
-            
+            channel.ExchangeDeclare(Const.ExchangeName, ExchangeType.Direct);
+            channel.QueueDeclare(Const.QueueName, false, false, true, null);
+            channel.QueueBind(Const.QueueName, Const.ExchangeName, Const.RoutingKey);
+
+            //wait for worker to finish
+            channel.BasicQos(0, 1, false);
+
             cd.Add(conn);
             cd.Add(channel);
             return cd;
